@@ -4,11 +4,14 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import keepcalm.mods.bukkit.BukkitContainer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.BanEntry;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
+import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.SaveHandler;
+import net.minecraft.world.storage.SaveHandlerMP;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,7 +19,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
-import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
 
@@ -195,8 +197,16 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     public boolean hasPlayedBefore() {
-    	//System.out.println("Has " + name + " played before? " + BukkitContainer.users.containsKey(name));
-        return BukkitContainer.users.containsKey(name);// != null;
+    	
+    	ISaveHandler sh = MinecraftServer.getServer().worldServers[0].getSaveHandler();
+    	
+    	if (sh instanceof SaveHandler) {
+    		SaveHandler sa = (SaveHandler) sh;
+    		return new File(new File(sa.getSaveDirectory(), "players"), this.name + ".dat").exists();
+    	} else {
+    		return true; /// Uuuh.... i guess?
+    	}
+    	
     }
 
     public Location getBedSpawnLocation() {

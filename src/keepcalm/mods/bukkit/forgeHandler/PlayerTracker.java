@@ -29,7 +29,6 @@ public class PlayerTracker implements IPlayerTracker {
 		online.add(player.username);
 		if (DEBUG)
 		System.out.println("User logged in: " + player.username.toLowerCase());
-		BukkitContainer.users.put(player.username.toLowerCase(), "SeenBefore");
 		if (CraftServer.instance() == null) {
 			return;
 		}
@@ -44,7 +43,7 @@ public class PlayerTracker implements IPlayerTracker {
 				Bukkit.getPluginManager().callEvent(ev);
 			}
 		};
-
+		
 		run.run();
 
 
@@ -61,9 +60,11 @@ public class PlayerTracker implements IPlayerTracker {
 
 	@Override
 	public void onPlayerChangedDimension(EntityPlayer player) {
-		EntityPlayerMP dude = (EntityPlayerMP) player;
-		PlayerChangedWorldEvent c = new PlayerChangedWorldEvent(CraftPlayerCache.getCraftPlayer(dude), CraftServer.instance().getWorld(dude.worldObj.provider.dimensionId));
+		
+		PlayerChangedWorldEvent c = new PlayerChangedWorldEvent(CraftPlayerCache.getCraftPlayer(player), CraftServer.instance().getWorld(player.worldObj.provider.dimensionId));
+		
 		Bukkit.getPluginManager().callEvent(c);
+		
 	}
 
 	@Override
@@ -80,8 +81,7 @@ public class PlayerTracker implements IPlayerTracker {
 
 		if (ForgeEventHandler.ready) {
 			run.run();
-		}
-		else {
+		} else {
 			Thread t = new Thread(run);
 			t.start();
 		}

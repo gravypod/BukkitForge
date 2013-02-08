@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -17,6 +18,7 @@ import keepcalm.mods.bukkit.forgeHandler.ForgeEventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.inventory.Container;
@@ -32,9 +34,12 @@ import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.*;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.BanEntry;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.EnumGameType;
+import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.SaveHandler;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.Validate;
@@ -95,12 +100,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player, CommandSend
 	//private long playerCurrentTime;
 	private boolean isTimeRelative;
 
-	public CraftPlayer(CraftServer server, EntityPlayerMP entity) {
+	public CraftPlayer(CraftServer server, EntityPlayer entity) {
 		super(server, entity);
 		perm.recalculatePermissions();
 	}
 
-	public CraftPlayer(EntityPlayerMP player) {
+	public CraftPlayer(EntityPlayer player) {
 		this((CraftServer) Bukkit.getServer(), player);
 	}
 
@@ -766,7 +771,14 @@ public class CraftPlayer extends CraftHumanEntity implements Player, CommandSend
 	}
 
 	public boolean hasPlayedBefore() {
-		return BukkitContainer.users.containsKey(getName().toLowerCase());
+    	ISaveHandler sh = MinecraftServer.getServer().worldServers[0].getSaveHandler();
+    	
+    	if (sh instanceof SaveHandler) {
+    		SaveHandler sa = (SaveHandler) sh;
+    		return new File(new File(sa.getSaveDirectory(), "players"), this.getName() + ".dat").exists();
+    	} else {
+    		return true; /// Uuuh.... i guess?
+    	}
 	}
 
 	public void setFirstPlayed(long firstPlayed) {

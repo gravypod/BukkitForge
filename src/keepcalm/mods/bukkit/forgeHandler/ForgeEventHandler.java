@@ -48,6 +48,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -69,7 +70,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.craftbukkit.CraftPlayerCache;
 import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.craftbukkit.block.CraftBlockFake;
 import org.bukkit.craftbukkit.entity.CraftCreeper;
@@ -331,17 +331,17 @@ public class ForgeEventHandler {
 				final int blockX = ev.x + ForgeDirection.getOrientation(ev.face).offsetX;
 				final int blockY = ev.y + ForgeDirection.getOrientation(ev.face).offsetY;
 				final int blockZ = ev.z + ForgeDirection.getOrientation(ev.face).offsetZ;
-				EntityPlayerMP forgePlayerMP;
+				EntityPlayer forgePlayer;
 				if (!(ev.entityPlayer instanceof EntityPlayerMP)) {
 
-					forgePlayerMP = BukkitContainer.MOD_PLAYER;
+					forgePlayer = BukkitContainer.MOD_PLAYER;
 					
 				}
 				else {
-					forgePlayerMP = (EntityPlayerMP) ev.entityPlayer;
+					forgePlayer = (EntityPlayer) ev.entityPlayer;
 				}
 
-				final CraftPlayer thePlayer = CraftPlayerCache.getCraftPlayer(forgePlayerMP);
+				final CraftPlayer thePlayer = CraftPlayerCache.getCraftPlayer(forgePlayer);
 				final CraftBlock beforeBlock = new CraftBlock(new CraftChunk(ev.entity.worldObj.getChunkFromBlockCoords(ev.x, ev.y)), blockX, blockY, blockZ);
 				WorldServer world = (WorldServer) ev.entity.worldObj;
 				int minX = world.getSpawnPoint().posX;
@@ -379,12 +379,12 @@ public class ForgeEventHandler {
 			} else if (ev.entityPlayer.inventory.getCurrentItem().getItem() instanceof ItemFlintAndSteel) {
 
 				// ignite
-				EntityPlayerMP fp;
+				EntityPlayer fp;
 
-				if (!(ev.entityPlayer instanceof EntityPlayerMP)) {
+				if (!(ev.entityPlayer instanceof EntityPlayer)) {
 					fp = BukkitContainer.MOD_PLAYER;
 				} else {
-					fp = (EntityPlayerMP) ev.entityPlayer;
+					fp = ev.entityPlayer;
 				}
 
 				BlockIgniteEvent bev = new BlockIgniteEvent(new CraftBlock(new CraftChunk(ev.entity.worldObj.getChunkFromBlockCoords(ev.x, ev.y)), ev.x, ev.y, ev.z), IgniteCause.FLINT_AND_STEEL, CraftPlayerCache.getCraftPlayer(fp));
@@ -917,11 +917,11 @@ public class ForgeEventHandler {
     }
     
     @ForgeSubscribe(receiveCanceled = true)
-    public void populateChunks(PopulateChunkEvent event) {
+    public void populateChunks(PopulateChunkEvent.Post event) {
     	ChunkPopulateEvent e = new ChunkPopulateEvent(new CraftChunk(event.world.getChunkFromBlockCoords(event.chunkX, event.chunkZ)));
     	Bukkit.getPluginManager().callEvent(e);
     }
 	
-
+    
 }
 

@@ -68,8 +68,6 @@ import cpw.mods.fml.relauncher.Side;
 @Mod(modid="BukkitForge",name="BukkitForge",version="Unknown",certificateFingerprint="")
 @NetworkMod(clientSideRequired=false,serverSideRequired=false,connectionHandler=ConnectionHandler.class,serverPacketHandlerSpec=@SidedPacketHandler(channels={},packetHandler=ForgePacketHandler.class))
 public class BukkitContainer {
-	public static Properties users;
-	
 	public static final String BF_FULL_VERSION = Versioning.getBFVersion();
 	
 	public static CraftServer bServer;
@@ -82,12 +80,11 @@ public class BukkitContainer {
 	public static boolean isDediServer;
 	public static String serverUUID;
 	public static boolean overrideVanillaCommands;
-	public static Logger bukkitLogger ;//.getLogger("[Bukkit API]");
-	public static boolean DEBUG = false;// ClassLoader.getSystemResourceAsStream("/net/minecraft/item") == null;
+	public static Logger bukkitLogger;
+	public static boolean DEBUG = false;
 	// hehe
 	public static boolean IGNORE_CONNECTION_RECEIVED = false;
-	public static String MOD_USERNAME = "[Mod]";
-	public static EntityPlayerMP MOD_PLAYER;
+	public static ModPlayer MOD_PLAYER;
 	public static String[] pluginsInPath;
 	public static String CRAFT_VERSION;
 	public static String LOADING_KICK_MESSAGE;
@@ -112,7 +109,11 @@ public class BukkitContainer {
 	 * 1 for console-only, 0 for broadcast, -1 for both
 	 */
 	public static int UPDATE_ANNOUNCE_METHOD;
+	
+	public static Configuration config;
 
+	public static String MOD_USERNAME;
+	
 	static {
 		System.out.println("THIS SERVER IS RUNNING BUKKITFORGE " + BF_FULL_VERSION + ". JUST IN CASE SOMEONE ASKS!");
 	}
@@ -158,7 +159,7 @@ public class BukkitContainer {
 		BukkitContainer.bukkitLogger.info("Initializing configuration...");
 		myConfigurationFile = ev.getSuggestedConfigurationFile();
 
-		Configuration config = new Configuration(myConfigurationFile);
+		new Configuration(myConfigurationFile);
 		config.addCustomCategoryComment("consoleConfig", "Configuration for the server console");
 		config.addCustomCategoryComment("dontTouchThis", "Things which are best left untouched");
 
@@ -273,15 +274,7 @@ public class BukkitContainer {
 		
 		
 		
-		BukkitContainer.users = new Properties();
 		if (propsFile == null) return;
-		try {
-			fis = new FileInputStream(propsFile);
-			users.load(fis);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
 		
 		//System.out.println("Successfully loaded users: " + Joiner.on(' ').join(users.keySet()));
 	}
@@ -338,7 +331,7 @@ public class BukkitContainer {
 	
 	@ServerStarted
 	public void serverStarted(FMLServerStartedEvent ev) {
-		BukkitContainer.MOD_PLAYER = new EntityPlayerMP(MinecraftServer.getServer(), MinecraftServer.getServer().worldServerForDimension(0), MOD_USERNAME, new ItemInWorldManager(MinecraftServer.getServer().worldServerForDimension(0)));
+		BukkitContainer.MOD_PLAYER = new ModPlayer();
 		System.out.println(MOD_PLAYER);
 		
 	}
@@ -351,15 +344,6 @@ public class BukkitContainer {
 		ForgeEventHandler.ready = false;
 		SchedulerTickHandler.tickOffset = 0;
 		if (propsFile == null) {
-			return;
-		}
-		
-		try {
-			FileOutputStream fis = new FileOutputStream(propsFile);
-			users.store(fis, "BukkitForge seen users. THIS IS TEMPORARY. Although it may become permanent.");
-		}
-		catch (Exception e) {
-			e.printStackTrace();
 			return;
 		}
 		

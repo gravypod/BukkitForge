@@ -1,18 +1,23 @@
 package org.bukkit.craftbukkit;
 
 import java.util.HashMap;
+import java.util.WeakHashMap;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 public class CraftPlayerCache {
 
+	private static final WeakHashMap<String, CraftPlayer> playerCache;
 	
+	static {
+		playerCache = new WeakHashMap<String, CraftPlayer>(MinecraftServer.getServerConfigurationManager(MinecraftServer.getServer()).getMaxPlayers());
+	}
 	
-	private static final HashMap<String, CraftPlayer> playerCache = new HashMap<String, CraftPlayer>();
-	
-	public static CraftPlayer getCraftPlayer(EntityPlayerMP player) {
+	public static CraftPlayer getCraftPlayer(EntityPlayer player) {
 //		System.out.println("Looking for " + player.username + " in cache...");
 		if (playerCache.containsKey(player.username.toLowerCase()))
 		{
@@ -26,8 +31,7 @@ public class CraftPlayerCache {
 				ply.setHandle(player);
 			//	System.out.println("Returning " + ply);
 				return ply;
-			}
-			else {
+			} else {
 				//System.out.println("Returning " + ply);
 				return ply;
 			}
@@ -38,7 +42,7 @@ public class CraftPlayerCache {
 		return ply;
 	}
 	
-	public static CraftPlayer getCraftPlayer( CraftServer server, EntityPlayerMP player) {
+	public static CraftPlayer getCraftPlayer( CraftServer server, EntityPlayer player) {
 		/*if (playerCache.containsKey(player.username))
 			return playerCache.get(player.username);
 		playerCache.put(player.username, new CraftPlayer(server, player));
